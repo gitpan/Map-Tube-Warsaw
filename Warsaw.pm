@@ -11,7 +11,7 @@ use Moo;
 use namespace::clean;
 
 # Version.
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 # Get XML.
 has xml => (
@@ -37,7 +37,13 @@ Map::Tube::Warsaw - Interface to the Warsaw Tube Map.
 
  use Map::Tube::Warsaw;
  my $obj = Map::Tube::Warsaw->new;
+ my $routes_ar = $obj->get_all_routes($from, $to);
+ my $lines_ar = $obj->get_lines;
+ my $station = $obj->get_node_by_id($station_id);
+ my $station = $obj->get_node_by_name($station_name);
  my $route = $obj->get_shortest_route($from, $to);
+ my $stations_ar = $obj->get_stations($line);
+ my $metro_name = $obj->name;
  my $xml_file = $obj->xml;
 
 =head1 DESCRIPTION
@@ -55,10 +61,40 @@ For more information about Warsaw Map, click L<here|https://en.wikipedia.org/wik
 
  Constructor.
 
+=item C<get_all_routes($from, $to)> [EXPERIMENTAL]
+
+ Get all routes from station to station.
+ Returns reference to array with Map::Tube::Route objects.
+
+=item C<get_lines()>
+
+ Get lines in metro map.
+ Returns reference to array with Map::Tube::Line objects.
+
+=item C<get_node_by_id($station_id)>
+
+ Get station node by id.
+ Returns Map::Tube::Node object.
+
+=item C<get_node_by_name($station_name)>
+
+ Get station node by name.
+ Returns Map::Tube::Node object.
+
 =item C<get_shortest_route($from, $to)>
 
- Get shortest route between $from and $to node name. Node name is case insensitive.
- Returns back the node sequence in string.
+ Get shortest route between $from and $to node names. Node names in $from and $to are case insensitive.
+ Returns Map::Tube::Route object.
+
+=item C<get_stations($line)>
+
+ Get list of stations for concrete metro line.
+ Returns reference to array with Map::Tube::Node objects.
+
+=item C<name()>
+
+ Get metro name.
+ Returns string with metro name.
 
 =item C<xml()>
 
@@ -81,13 +117,13 @@ For more information about Warsaw Map, click L<here|https://en.wikipedia.org/wik
  my $obj = Map::Tube::Warsaw->new;
 
  # Get route.
- my $route = $obj->get_shortest_route(decode_utf8('Люлин'), decode_utf8('Вардар'));
+ my $route = $obj->get_shortest_route(decode_utf8('Imielin'), decode_utf8('Świętokrzyska'));
 
  # Print out type.
  print "Route: ".encode_utf8($route)."\n";
 
  # Output:
- # Route: Люлин (Първи метродиаметър), Западен парк (Първи метродиаметър), Вардар (Първи метродиаметър)
+ # Route: Imielin (Linia M1), Stokłosy (Linia M1), Ursynów (Linia M1), Służew (Linia M1), Wilanowska (Linia M1), Wierzbno (Linia M1), Racławicka (Linia M1), Pole Mokotowskie (Linia M1), Politechnika (Linia M1), Centrum (Linia M1), Świętokrzyska (Linia M1)
 
 =head1 EXAMPLE2
 
@@ -111,6 +147,44 @@ For more information about Warsaw Map, click L<here|https://en.wikipedia.org/wik
  # Output like:
  # XML file: .*/warsaw-map.xml
 
+=head1 EXAMPLE3
+
+ # Pragmas.
+ use strict;
+ use warnings;
+
+ # Modules.
+ use Map::Tube::GraphViz;
+ use Map::Tube::GraphViz::Utils qw(node_color_without_label);
+ use Map::Tube::Warsaw;
+
+ # Object.
+ my $obj = Map::Tube::Warsaw->new;
+
+ # GraphViz object.
+ my $g = Map::Tube::GraphViz->new(
+         'callback_node' => \&node_color_without_label,
+         'driver' => 'neato',
+         'tube' => $obj,
+ );
+
+ # Get graph to file.
+ $g->graph('Warsaw.png');
+
+ # Print file.
+ system "ls -l Warsaw.png";
+
+ # Output like:
+ # -rw-r--r-- 1 skim skim 71382 Dec 28 19:58 Warsaw.png
+
+=begin html
+
+<a href="https://raw.githubusercontent.com/tupinek/Map-Tube-Warsaw/master/images/ex3.png">
+  <img src="https://raw.githubusercontent.com/tupinek/Map-Tube-Warsaw/master/images/ex3.png" alt="Metro w Warszawie" width="300px" height="300px" />
+</a>
+
+=end html
+
 =head1 DEPENDENCIES
 
 L<File::Share>,
@@ -121,17 +195,35 @@ L<namespace::clean>.
 =head1 SEE ALSO
 
 L<Map::Tube>,
+L<Map::Tube::GraphViz>,
+L<Map::Tube::Text::Table>,
+L<Task::Map::Tube>.
+
 L<Map::Tube::Barcelona>,
+L<Map::Tube::Berlin>,
+L<Map::Tube::Bucharest>,
 L<Map::Tube::Delhi>,
+L<Map::Tube::Dnipropetrovsk>,
+L<Map::Tube::Kazan>,
+L<Map::Tube::Kharkiv>,
+L<Map::Tube::Kiev>,
 L<Map::Tube::London>,
+L<Map::Tube::Minsk>,
+L<Map::Tube::Moscow>,
+L<Map::Tube::Novosibirsk>,
 L<Map::Tube::NYC>,
 L<Map::Tube::Prague>,
+L<Map::Tube::SaintPetersburg>,
+L<Map::Tube::Samara>,
 L<Map::Tube::Sofia>,
-L<Map::Tube::Tokyo>.
+L<Map::Tube::Tbilisi>,
+L<Map::Tube::Tokyo>,
+L<Map::Tube::Vienna>,
+L<Map::Tube::Yekaterinburg>.
 
 =head1 REPOSITORY
 
-L<https://github.com/Manwar/Map-Tube-Warsaw>
+L<https://github.com/tupinek/Map-Tube-Warsaw>
 
 =head1 AUTHOR
 
@@ -147,6 +239,6 @@ L<http://skim.cz>
 
 =head1 VERSION
 
-0.01
+0.02
 
 =cut
